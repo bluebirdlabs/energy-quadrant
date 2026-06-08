@@ -275,6 +275,12 @@
   .next-card .label{color:var(--teal-soft);margin-bottom:12px;display:block}
   .next-card h3{color:#fff;font-size:26px;margin-bottom:12px}
   .next-card p{color:rgba(232,245,246,.85);font-size:14.5px;font-weight:300;margin-bottom:24px}
+  .email-direct{margin-top:16px;font-size:13.5px;color:rgba(232,245,246,.8);font-weight:300}
+  .email-addr{font-family:var(--font-sans);font-size:13.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:5px 11px;cursor:pointer;transition:background .18s;margin-left:2px}
+  .email-addr:hover{background:rgba(255,255,255,.18)}
+  .copy-note{margin-top:12px;font-size:12.5px;font-weight:600;color:var(--amber);min-height:18px;opacity:0;transition:opacity .25s}
+  .copy-note.show{opacity:1}
 
   .res-actions{display:flex;gap:12px;justify-content:center;margin:34px 0;flex-wrap:wrap}
 
@@ -462,7 +468,9 @@
       <span class="label">What's next</span>
       <h3>Take the next step with Lead with Energy</h3>
       <p>Your Energy Signature is the starting point. <strong>Lead with Energy</strong> helps leaders turn these insights into sustainable, repeatable practice — across the dimensions that matter most for you.</p>
-      <a class="btn btn-amber" href="mailto:cherry@bluebirdlabs.co?subject=Lead%20with%20Energy%20enquiry">Email us for more information</a>
+      <a class="btn btn-amber" href="mailto:cherry@bluebirdlabs.co?subject=Lead%20with%20Energy%20enquiry" onclick="copyEmail()">Email us for more information</a>
+      <div class="email-direct">or email us directly at <button type="button" class="email-addr" onclick="copyEmail(event)">cherry@bluebirdlabs.co</button></div>
+      <div class="copy-note" id="copy-note"></div>
     </div>
   </div>
 
@@ -884,6 +892,25 @@ function switchScreen(name){
 }
 function goWelcome(){ switchScreen('welcome'); }
 function restart(){ answers={}; hideRegistration(); switchScreen('welcome'); }
+
+/* ---------- Email helper: copy address + show confirmation (mailto still fires for those with a handler) ---------- */
+function copyEmail(e){
+  const addr='cherry@bluebirdlabs.co';
+  const note=document.getElementById('copy-note');
+  function confirm(){
+    if(!note) return;
+    note.textContent='Copied — '+addr;
+    note.classList.add('show');
+    clearTimeout(window.__copyT);
+    window.__copyT=setTimeout(()=>note.classList.remove('show'),3500);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(addr).then(confirm).catch(()=>{});
+  }else{
+    try{ const t=document.createElement('textarea'); t.value=addr; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); confirm(); }catch(_){}
+  }
+  // Note: we do NOT preventDefault — the mailto still opens a mail app for anyone who has one set up.
+}
 
 /* ---------- Init ---------- */
 buildWelcome();
